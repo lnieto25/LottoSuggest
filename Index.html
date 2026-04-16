@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="LottoSuggest"/>
+<title>LottoSuggest 6/40</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg0:#09090f; --bg1:#111120; --bg2:#1a1a2e;
+  --gold:#fbbf24; --gold2:#f59e0b; --gold-dim:rgba(251,191,36,0.15);
+  --red:#ef4444; --orange:#f97316; --blue:#38bdf8; --indigo:#818cf8; --green:#34d399;
+  --glass:rgba(255,255,255,0.05); --border:rgba(255,255,255,0.09);
+  --text:rgba(255,255,255,0.92); --muted:rgba(255,255,255,0.4);
+  --font-display:'Playfair Display',serif;
+  --font-mono:'DM Mono',monospace;
+  --font-body:'DM Sans',sans-serif;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg0);color:var(--text);font-family:var(--font-body);overflow-x:hidden;}
+body{background:linear-gradient(160deg,#09090f 0%,#111120 50%,#0d0d1a 100%);min-height:100vh;}
+
+/* Layout */
+#app{display:flex;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;}
+#header{position:sticky;top:0;z-index:50;padding:env(safe-area-inset-top,0) 1rem 0.75rem;
+  background:linear-gradient(to bottom,rgba(9,9,15,0.97) 80%,transparent);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
+#header-inner{display:flex;justify-content:space-between;align-items:center;padding-top:0.75rem;}
+#logo{font-family:var(--font-display);font-size:1.4rem;color:var(--gold);letter-spacing:-0.02em;}
+#logo span{font-size:0.65rem;display:block;letter-spacing:0.15em;text-transform:uppercase;opacity:0.4;font-family:var(--font-body);}
+#badge{text-align:right;font-size:0.65rem;color:var(--muted);}
+#badge .active{color:var(--gold);}
+#content{flex:1;padding:0.75rem 1rem 6rem;}
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:50;
+  background:rgba(9,9,15,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  padding-bottom:calc(var(--safe-bottom) + 0.25rem);}
+#nav-inner{display:flex;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.2rem;padding:0.6rem 0;
+  background:none;border:none;color:var(--muted);cursor:pointer;transition:color 0.2s;font-family:var(--font-body);}
+.nav-btn.active{color:var(--gold);}
+.nav-btn .nav-icon{font-size:1.4rem;line-height:1;}
+.nav-btn .nav-label{font-size:0.6rem;letter-spacing:0.05em;text-transform:uppercase;}
+.nav-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);margin-top:1px;}
+
+/* Cards */
+.card{background:var(--glass);border:1px solid var(--border);border-radius:1.25rem;padding:1.1rem;margin-bottom:0.85rem;}
+.card-title{font-family:var(--font-display);font-size:1.05rem;margin-bottom:0.25rem;}
+.card-sub{font-size:0.7rem;color:var(--muted);margin-bottom:0.85rem;}
+
+/* Buttons */
+.btn-primary{width:100%;padding:0.85rem;border-radius:0.85rem;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1a2e;
+  font-family:var(--font-display);font-size:1rem;font-weight:700;letter-spacing:0.05em;
+  transition:transform 0.1s,opacity 0.2s;}
+.btn-primary:active{transform:scale(0.97);}
+.btn-primary:disabled{opacity:0.4;}
+.btn-ghost{padding:0.6rem 1rem;border-radius:0.75rem;border:1px solid var(--border);
+  background:var(--glass);color:var(--text);cursor:pointer;font-family:var(--font-body);font-size:0.85rem;
+  transition:opacity 0.2s;}
+.btn-ghost:active{opacity:0.7;}
+.btn-ghost:disabled{opacity:0.3;}
+.btn-gold-outline{padding:0.7rem 1rem;border-radius:0.75rem;border:1px solid rgba(251,191,36,0.4);
+  background:var(--gold-dim);color:var(--gold);cursor:pointer;font-family:var(--font-body);font-size:0.85rem;font-weight:600;}
+.btn-gold-outline:active{opacity:0.7;}
+
+/* Range */
+input[type=range]{width:100%;margin-top:0.35rem;accent-color:var(--gold);}
+
+/* Number inputs */
+.num-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:0.4rem;margin-top:0.4rem;}
+.num-input{padding:0.6rem 0.2rem;border-radius:0.65rem;border:1px solid var(--border);
+  background:rgba(255,255,255,0.07);color:var(--text);text-align:center;font-size:1.1rem;
+  font-family:var(--font-mono);font-weight:700;-moz-appearance:textfield;width:100%;}
+.num-input::-webkit-outer-spin-button,.num-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.num-input:focus{outline:1px solid var(--gold);}
+
+/* Text inputs */
+.text-input{width:100%;padding:0.55rem 0.75rem;border-radius:0.65rem;border:1px solid var(--border);
+  background:rgba(255,255,255,0.07);color:var(--text);font-family:var(--font-body);font-size:0.85rem;margin-top:0.3rem;}
+.text-input:focus{outline:1px solid var(--gold);}
+input[type=date].text-input{color-scheme:dark;}
+
+/* Labels */
+.label{font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;}
+
+/* Balls */
+.ball{border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-weight:700;border:2px solid rgba(255,255,255,0.25);
+  flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.4);select:none;}
+.ball-lg{width:3.2rem;height:3.2rem;font-size:1.1rem;}
+.ball-md{width:2.4rem;height:2.4rem;font-size:0.8rem;}
+.ball-sm{width:1.9rem;height:1.9rem;font-size:0.65rem;}
+.ball-xs{width:1.6rem;height:1.6rem;font-size:0.6rem;}
+.b-hot-high{background:#f97316;color:#fff;}
+.b-hot-low{background:#ef4444;color:#fff;}
+.b-cold-high{background:#818cf8;color:#fff;}
+.b-cold-low{background:#38bdf8;color:#0c4a6e;}
+.b-default{background:rgba(255,255,255,0.12);color:var(--text);}
+.b-even-high{background:#fbbf24;color:#78350f;}
+.b-odd-high{background:#ef4444;color:#fff;}
+.b-even-low{background:#38bdf8;color:#0c4a6e;}
+.b-odd-low{background:#34d399;color:#064e3b;}
+
+/* Balls row */
+.balls-row{display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;}
+
+/* Ticket card */
+.ticket{background:var(--glass);border:1px solid var(--border);border-radius:1.1rem;padding:0.85rem;margin-bottom:0.6rem;}
+.ticket.fav{border-color:var(--gold);}
+.ticket-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.6rem;}
+.ticket-label{font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);}
+.ticket-sublabel{font-size:0.65rem;color:var(--muted);font-style:italic;margin-top:0.1rem;}
+.ticket-actions{display:flex;gap:0.5rem;}
+.ticket-actions button{background:none;border:none;font-size:1.1rem;cursor:pointer;padding:0.2rem;}
+.ticket-stats{display:flex;gap:0.75rem;margin-top:0.5rem;font-size:0.65rem;color:var(--muted);}
+
+/* Progress bar */
+.progress-wrap{margin-bottom:0.5rem;}
+.progress-label{display:flex;justify-content:space-between;font-size:0.65rem;color:var(--muted);margin-bottom:0.25rem;}
+.progress-track{height:6px;border-radius:3px;background:rgba(255,255,255,0.07);}
+.progress-fill{height:100%;border-radius:3px;transition:width 0.4s ease;}
+
+/* Tabs */
+.tabs{display:grid;gap:0.25rem;border-radius:0.85rem;padding:0.25rem;background:rgba(255,255,255,0.04);margin-bottom:0.85rem;}
+.tabs.t2{grid-template-columns:1fr 1fr;}
+.tabs.t4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.tab-btn{padding:0.55rem 0.25rem;border-radius:0.65rem;border:none;cursor:pointer;font-size:0.7rem;
+  font-family:var(--font-body);font-weight:500;background:transparent;color:var(--muted);transition:all 0.2s;text-align:center;}
+.tab-btn.active{background:var(--gold-dim);border:1px solid rgba(251,191,36,0.5);color:var(--gold);}
+
+/* Strategy buttons */
+.strat-btn{display:flex;flex-direction:column;gap:0.15rem;text-align:left;padding:0.6rem 0.85rem;
+  border-radius:0.75rem;border:1px solid var(--border);background:rgba(255,255,255,0.03);
+  cursor:pointer;color:var(--text);font-family:var(--font-body);font-size:0.82rem;font-weight:500;
+  width:100%;margin-bottom:0.35rem;transition:all 0.15s;}
+.strat-btn.active{background:var(--gold-dim);border-color:rgba(251,191,36,0.5);color:var(--gold);}
+.strat-detected{font-size:0.65rem;color:var(--muted);font-style:normal;padding:0.15rem 0 0 0.75rem;
+  border-left:2px solid;margin-top:0.15rem;}
+
+/* Stat boxes */
+.stat-grid{display:grid;gap:0.5rem;margin-bottom:0.75rem;}
+.stat-grid.g2{grid-template-columns:1fr 1fr;}
+.stat-grid.g3{grid-template-columns:1fr 1fr 1fr;}
+.stat-box{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:0.85rem;padding:0.65rem;text-align:center;}
+.stat-box .stat-label{font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);line-height:1.3;}
+.stat-box .stat-val{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;margin:0.25rem 0;}
+.stat-box .stat-sub{font-size:0.6rem;color:var(--muted);}
+
+/* Error box */
+.error-box{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);border-radius:0.75rem;
+  padding:0.65rem 0.85rem;font-size:0.8rem;color:#fca5a5;margin-bottom:0.5rem;}
+
+/* Success */
+.success-box{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);border-radius:0.75rem;
+  padding:0.65rem 0.85rem;font-size:0.8rem;color:#6ee7b7;margin-bottom:0.5rem;}
+
+/* Disclaimer */
+.disclaimer{text-align:center;font-size:0.65rem;color:var(--muted);opacity:0.5;padding:0.5rem 0 1rem;}
+
+/* Frequency bar */
+.freq-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.2rem;}
+.freq-num{font-family:var(--font-mono);font-size:0.7rem;width:1.5rem;text-align:right;color:var(--muted);}
+.freq-track{flex:1;height:1.1rem;border-radius:0.55rem;background:rgba(255,255,255,0.05);position:relative;overflow:hidden;}
+.freq-fill{height:100%;border-radius:0.55rem;}
+.freq-count{position:absolute;right:0.4rem;top:50%;transform:translateY(-50%);font-size:0.6rem;color:var(--muted);}
+.freq-icon{width:1rem;font-size:0.65rem;}
+
+/* Pairs */
+.pair-row{display:flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.03);
+  border-radius:0.65rem;padding:0.5rem;margin-bottom:0.35rem;}
+.pair-rank{font-size:0.6rem;color:var(--muted);font-family:var(--font-mono);width:1.5rem;}
+.pair-bar-wrap{flex:1;height:0.4rem;border-radius:0.2rem;background:rgba(255,255,255,0.06);}
+.pair-bar{height:100%;border-radius:0.2rem;background:var(--gold);}
+.pair-count{font-family:var(--font-mono);font-size:0.75rem;color:var(--gold);font-weight:700;}
+
+/* Month chart */
+.month-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;}
+.month-name{font-size:0.65rem;font-family:var(--font-mono);width:2rem;color:var(--muted);}
+.month-track{flex:1;height:1.4rem;border-radius:0.7rem;background:rgba(255,255,255,0.04);overflow:hidden;}
+.month-fill{height:100%;border-radius:0.7rem;background:rgba(251,191,36,0.3);display:flex;align-items:center;min-width:0;}
+.month-fill span{font-size:0.65rem;font-weight:700;color:var(--gold);padding:0 0.5rem;white-space:nowrap;}
+.month-top{width:2rem;display:flex;justify-content:center;}
+.month-topball{width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:0.55rem;font-weight:700;font-family:var(--font-mono);
+  background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:var(--gold);}
+
+/* Gap bars */
+.gap-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;}
+.gap-ball{width:1.7rem;height:1.7rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:0.6rem;font-weight:700;font-family:var(--font-mono);flex-shrink:0;}
+.gap-wrap{flex:1;}
+.gap-track{height:0.6rem;border-radius:0.3rem;background:rgba(255,255,255,0.05);}
+.gap-fill{height:100%;border-radius:0.3rem;}
+.gap-info{display:flex;justify-content:space-between;font-size:0.6rem;color:var(--muted);margin-top:0.1rem;}
+
+/* Compare result */
+.match-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;}
+.match-label{font-size:0.65rem;color:var(--muted);width:4.5rem;}
+.match-track{flex:1;height:0.85rem;border-radius:0.4rem;background:rgba(255,255,255,0.05);}
+.match-fill{height:100%;border-radius:0.4rem;}
+.match-count{font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);width:1.5rem;text-align:right;}
+
+/* History list */
+.history-list{max-height:11rem;overflow-y:auto;display:flex;flex-direction:column;gap:0.35rem;}
+.history-row{display:flex;align-items:center;gap:0.4rem;}
+.history-idx{font-size:0.6rem;color:var(--muted);width:1.2rem;font-family:var(--font-mono);}
+
+/* Hot/cold chips */
+.chip{display:inline-flex;align-items:center;padding:0.25rem 0.65rem;border-radius:99px;
+  font-size:0.65rem;font-weight:600;margin-right:0.35rem;margin-bottom:0.35rem;}
+
+/* Gestion table */
+.sorteo-row{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:0.75rem;
+  padding:0.65rem;margin-bottom:0.4rem;}
+.sorteo-fecha{font-size:0.65rem;color:var(--muted);font-family:var(--font-mono);margin-bottom:0.4rem;}
+.sorteo-actions{display:flex;gap:0.4rem;float:right;}
+.btn-edit{font-size:0.65rem;padding:0.2rem 0.55rem;border-radius:0.4rem;cursor:pointer;
+  background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.35);color:var(--gold);}
+.btn-del{font-size:0.65rem;padding:0.2rem 0.55rem;border-radius:0.4rem;cursor:pointer;
+  background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#fca5a5;}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-top:0.75rem;}
+.page-info{font-size:0.7rem;color:var(--muted);}
+
+/* Loading */
+#loading{position:fixed;inset:0;background:var(--bg0);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:0.75rem;z-index:999;}
+#loading .spin{font-size:2.5rem;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loading p{font-size:0.85rem;color:var(--muted);}
+
+/* MC score bars */
+.mc-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem;}
+.mc-rank{font-size:0.6rem;color:var(--muted);width:1.2rem;font-family:var(--font-mono);}
+.mc-track{flex:1;height:0.85rem;border-radius:0.4rem;overflow:hidden;background:rgba(255,255,255,0.05);}
+.mc-fill{height:100%;border-radius:0.4rem;background:linear-gradient(90deg,var(--gold),var(--orange));}
+.mc-score{font-size:0.6rem;color:var(--muted);font-family:var(--font-mono);width:3rem;text-align:right;}
+
+/* Compare best */
+.best-ball{width:2rem;height:2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:0.65rem;font-weight:700;font-family:var(--font-mono);}
+.best-ball.match{background:rgba(251,191,36,0.25);border:2px solid var(--gold);color:var(--gold);}
+.best-ball.no-match{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted);}
+
+/* Warning */
+.warn-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:0.75rem;
+  padding:0.65rem 0.85rem;font-size:0.75rem;color:#fcd34d;margin-bottom:0.6rem;}
+
+/* Scroll */
+.scroll-area{max-height:18rem;overflow-y:auto;}
+</style>
+</head>
+<body>
+<div id="loading"><div class="spin">🎱</div><p>Cargando LottoSuggest…</p></div>
+<div id="app" style="display:none">
+  <div id="header">
+    <div id="header-inner">
+      <div id="logo">🎱 LottoSuggest<span>Lotería 6 / 40</span></div>
+      <div id="badge"><div id="badge-count">0 sorteos</div><div id="badge-pattern" class="active" style="display:none">✓ Patrón activo</div></div>
+    </div>
+  </div>
+  <div id="content"></div>
+  <div id="nav">
+    <div id="nav-inner">
+      <button class="nav-btn active" onclick="showTab('generar')" id="nb-generar">
+        <span class="nav-icon">🎱</span><span class="nav-label">Generar</span><div class="nav-dot" id="nd-generar"></div>
+      </button>
+      <button class="nav-btn" onclick="showTab('patrones')" id="nb-patrones">
+        <span class="nav-icon">🔍</span><span class="nav-label">Patrones</span><div class="nav-dot" id="nd-patrones" style="display:none"></div>
+      </button>
+      <button class="nav-btn" onclick="showTab('stats')" id="nb-stats">
+        <span class="nav-icon">📊</span><span class="nav-label">Estadísticas</span><div class="nav-dot" id="nd-stats" style="display:none"></div>
+      </button>
+      <button class="nav-btn" onclick="showTab('gestion')" id="nb-gestion">
+        <span class="nav-icon">📋</span><span class="nav-label">Gestión</span><div class="nav-dot" id="nd-gestion" style="display:none"></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// INDEXEDDB
+// ═══════════════════════════════════════════════════════════
+const DB_NAME='LottoSuggestDB', DB_VER=1, STORE='sorteos';
+let db=null;
+function openDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(DB_NAME,DB_VER);
+    req.onupgradeneeded=e=>{
+      const d=e.target.result;
+      if(!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE,{keyPath:'id'});
+    };
+    req.onsuccess=e=>{db=e.target.result;res(db);};
+    req.onerror=e=>rej(e);
+  });
+}
+function dbGetAll(){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readonly');
+    const req=tx.objectStore(STORE).getAll();
+    req.onsuccess=e=>res(e.target.result||[]);
+    req.onerror=e=>rej(e);
+  });
+}
+function dbPut(item){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    const req=tx.objectStore(STORE).put(item);
+    req.onsuccess=()=>res();req.onerror=e=>rej(e);
+  });
+}
+function dbDelete(id){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    const req=tx.objectStore(STORE).delete(id);
+    req.onsuccess=()=>res();req.onerror=e=>rej(e);
+  });
+}
+function dbClear(){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    const req=tx.objectStore(STORE).clear();
+    req.onsuccess=()=>res();req.onerror=e=>rej(e);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let sorteos=[];
+let analysis=null;
+let currentTab='generar';
+let sessionHistory=[];
+let sessionFavorites=new Set();
+let currentTickets=[];
+let gestionPage=0;
+let statsSection='frecuencia';
+let gestionEditId=null;
+const GESTION_PER_PAGE=10;
+
+// ═══════════════════════════════════════════════════════════
+// CRYPTO RNG
+// ═══════════════════════════════════════════════════════════
+function secureRandom(min,max){
+  const a=new Uint32Array(1);crypto.getRandomValues(a);
+  return min+(a[0]%(max-min+1));
+}
+function pickRandom(pool,n){
+  const p=[...pool],chosen=[];
+  while(chosen.length<n&&p.length){const i=secureRandom(0,p.length-1);chosen.push(p.splice(i,1)[0]);}
+  return chosen;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ANALYSIS FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+function analyzePatterns(s){
+  if(!s.length)return null;
+  const freq={};for(let i=1;i<=40;i++)freq[i]=0;
+  s.forEach(x=>x.numeros.forEach(n=>freq[n]++));
+  const sorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  const half=Math.ceil(sorted.length/2);
+  const hotSet=new Set(sorted.slice(0,half).map(([n])=>+n));
+  const coldSet=new Set(sorted.slice(half).map(([n])=>+n));
+  const pc={'hot-hot':0,'hot-cold':0,'cold-cold':0};
+  const qt={'hot-low':0,'hot-high':0,'cold-low':0,'cold-high':0};
+  s.forEach(x=>{
+    const hc=x.numeros.filter(n=>hotSet.has(n)).length;
+    if(hc>=4)pc['hot-hot']++;else if(6-hc>=4)pc['cold-cold']++;else pc['hot-cold']++;
+    qt['hot-low']+=x.numeros.filter(n=>hotSet.has(n)&&n<=20).length;
+    qt['hot-high']+=x.numeros.filter(n=>hotSet.has(n)&&n>20).length;
+    qt['cold-low']+=x.numeros.filter(n=>coldSet.has(n)&&n<=20).length;
+    qt['cold-high']+=x.numeros.filter(n=>coldSet.has(n)&&n>20).length;
+  });
+  const n=s.length;
+  const aq={'hot-low':+(qt['hot-low']/n).toFixed(1),'hot-high':+(qt['hot-high']/n).toFixed(1),
+    'cold-low':+(qt['cold-low']/n).toFixed(1),'cold-high':+(qt['cold-high']/n).toFixed(1)};
+  const dominant=Object.entries(pc).sort((a,b)=>b[1]-a[1])[0][0];
+  const hhp=+((qt['hot-high']/(qt['hot-low']+qt['hot-high']||1))*100).toFixed(0);
+  const clp=+((qt['cold-low']/(qt['cold-low']+qt['cold-high']||1))*100).toFixed(0);
+  let sp='mixed';
+  if(hhp>=60&&clp>=60)sp='hot-high_cold-low';
+  else if(hhp<=40&&clp<=40)sp='hot-low_cold-high';
+  return{freq,hotSet,coldSet,patternCounts:pc,dominant,avgQuadrant:aq,hotHighPct:hhp,coldLowPct:clp,structuralPattern:sp,total:n};
+}
+
+function analyzeGaps(s){
+  const byDate=[...s].sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+  const lastSeen={},gaps={};
+  for(let i=1;i<=40;i++){lastSeen[i]=null;gaps[i]=[];}
+  byDate.forEach((x,idx)=>x.numeros.forEach(n=>{
+    if(lastSeen[n]!==null)gaps[n].push(idx-lastSeen[n]);
+    lastSeen[n]=idx;
+  }));
+  const total=byDate.length;
+  return Array.from({length:40},(_,i)=>i+1).map(n=>({
+    number:n,
+    sorteosSinceLastSeen:lastSeen[n]===null?total:total-1-lastSeen[n],
+    avgGap:gaps[n].length?+(gaps[n].reduce((a,b)=>a+b,0)/gaps[n].length).toFixed(1):null,
+    neverSeen:lastSeen[n]===null,
+  })).sort((a,b)=>b.sorteosSinceLastSeen-a.sorteosSinceLastSeen);
+}
+
+function analyzePairs(s){
+  const pc={};
+  s.forEach(x=>{const ns=x.numeros;
+    for(let i=0;i<ns.length;i++)for(let j=i+1;j<ns.length;j++){
+      const k=`${ns[i]}-${ns[j]}`;pc[k]=(pc[k]||0)+1;
+    }
+  });
+  return Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,10)
+    .map(([k,c])=>({pair:k.split('-').map(Number),count:c}));
+}
+
+function analyzeByMonth(s){
+  const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const md=Array.from({length:12},(_,i)=>({month:MN[i],count:0,nf:{}}));
+  s.forEach(x=>{
+    const m=new Date(x.fecha+'T12:00:00').getMonth();
+    md[m].count++;
+    x.numeros.forEach(n=>{md[m].nf[n]=(md[m].nf[n]||0)+1;});
+  });
+  return md.map(m=>({...m,topNum:m.count===0?null:+Object.entries(m.nf).sort((a,b)=>b[1]-a[1])[0]?.[0]}));
+}
+
+function runMonteCarlo(s,iters=10000){
+  if(!s.length)return null;
+  const tn=s.length*6;
+  const freq={};for(let i=1;i<=40;i++)freq[i]=0;
+  s.forEach(x=>x.numeros.forEach(n=>freq[n]++));
+  const fs=Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  const hotSet=new Set(fs.slice(0,20).map(([n])=>+n));
+  const tHot=s.reduce((a,x)=>a+x.numeros.filter(n=>hotSet.has(n)).length,0)/tn;
+  const tLow=s.reduce((a,x)=>a+x.numeros.filter(n=>n<=20).length,0)/tn;
+  const tEven=s.reduce((a,x)=>a+x.numeros.filter(n=>n%2===0).length,0)/tn;
+  const score=t=>1-(Math.abs(t.filter(n=>hotSet.has(n)).length/6-tHot)+
+    Math.abs(t.filter(n=>n<=20).length/6-tLow)+Math.abs(t.filter(n=>n%2===0).length/6-tEven))/3;
+  const ns={};for(let i=1;i<=40;i++)ns[i]=0;let ts=0;
+  for(let it=0;it<iters;it++){
+    const pool=[...Array.from({length:40},(_,i)=>i+1)],t=[];
+    while(t.length<6){const i=secureRandom(0,pool.length-1);t.push(pool.splice(i,1)[0]);}
+    const sc=score(t);t.forEach(n=>ns[n]+=sc);ts+=sc;
+  }
+  const mf={};for(let i=1;i<=40;i++)mf[i]=+(ns[i]/ts*100).toFixed(2);
+  const ms=Object.entries(mf).sort((a,b)=>b[1]-a[1]);
+  return{mcFreq:mf,topNums:ms.slice(0,10).map(([n,sc])=>({number:+n,score:sc})),
+    targetHotPct:tHot,targetLowPct:tLow,targetEvenPct:tEven};
+}
+
+function compareWithHistory(ticket,s){
+  if(!s.length)return null;
+  let maxM=0,bestM=null;
+  const mc={0:0,1:0,2:0,3:0,4:0,5:0,6:0};
+  s.forEach(x=>{const m=ticket.filter(n=>x.numeros.includes(n)).length;mc[m]++;if(m>maxM){maxM=m;bestM=x;}});
+  const avg=s.reduce((a,x)=>a+ticket.filter(n=>x.numeros.includes(n)).length,0)/s.length;
+  return{matchCounts:mc,maxMatches:maxM,bestMatch:bestM,avgMatch:+avg.toFixed(2)};
+}
+
+// ═══════════════════════════════════════════════════════════
+// TICKET GENERATION
+// ═══════════════════════════════════════════════════════════
+function generateBasic(strategy,fixed=[],excluded=[]){
+  const pool=Array.from({length:40},(_,i)=>i+1).filter(n=>!excluded.includes(n));
+  const chosen=[...fixed.filter(n=>n>=1&&n<=40&&!excluded.includes(n))];
+  let available=pool.filter(n=>!chosen.includes(n));
+  if(strategy==='balanced-parity'){
+    const evens=available.filter(n=>n%2===0),odds=available.filter(n=>n%2!==0);
+    while(chosen.length<6){
+      const ne=3-chosen.filter(n=>n%2===0).length,no=3-chosen.filter(n=>n%2!==0).length;
+      if(ne>0&&evens.length)chosen.push(evens.splice(secureRandom(0,evens.length-1),1)[0]);
+      else if(no>0&&odds.length)chosen.push(odds.splice(secureRandom(0,odds.length-1),1)[0]);
+      else{const r=available.filter(n=>!chosen.includes(n));if(!r.length)break;chosen.push(r[secureRandom(0,r.length-1)]);}
+    }
+  } else if(strategy==='balanced-range'){
+    const lows=available.filter(n=>n<=20),highs=available.filter(n=>n>20);
+    while(chosen.length<6){
+      const nl=3-chosen.filter(n=>n<=20).length,nh=3-chosen.filter(n=>n>20).length;
+      if(nl>0&&lows.length)chosen.push(lows.splice(secureRandom(0,lows.length-1),1)[0]);
+      else if(nh>0&&highs.length)chosen.push(highs.splice(secureRandom(0,highs.length-1),1)[0]);
+      else{const r=available.filter(n=>!chosen.includes(n));if(!r.length)break;chosen.push(r[secureRandom(0,r.length-1)]);}
+    }
+  } else {
+    while(chosen.length<6&&available.length)chosen.push(available.splice(secureRandom(0,available.length-1),1)[0]);
+  }
+  return chosen.sort((a,b)=>a-b);
+}
+
+function generatePattern(pattern,an,fixed=[],excluded=[]){
+  if(!an)return generateBasic('random',fixed,excluded);
+  const{hotSet,coldSet}=an;
+  const all=Array.from({length:40},(_,i)=>i+1).filter(n=>!excluded.includes(n));
+  const chosen=[...fixed.filter(n=>n>=1&&n<=40&&!excluded.includes(n))];
+  const rem=()=>all.filter(n=>!chosen.includes(n));
+  const fill=(pool,need)=>pickRandom(pool,need).forEach(n=>chosen.push(n));
+  if(pattern==='dominant-hot'){fill(rem().filter(n=>hotSet.has(n)),Math.min(4,rem().filter(n=>hotSet.has(n)).length));fill(rem().filter(n=>coldSet.has(n)),6-chosen.length);}
+  else if(pattern==='dominant-cold'){fill(rem().filter(n=>coldSet.has(n)),Math.min(4,rem().filter(n=>coldSet.has(n)).length));fill(rem().filter(n=>hotSet.has(n)),6-chosen.length);}
+  else if(pattern==='balanced-hot-cold'){fill(rem().filter(n=>hotSet.has(n)),Math.min(3,rem().filter(n=>hotSet.has(n)).length));fill(rem().filter(n=>coldSet.has(n)),6-chosen.length);}
+  else if(pattern==='hot-high_cold-low'){fill(rem().filter(n=>hotSet.has(n)&&n>20),Math.min(3,rem().filter(n=>hotSet.has(n)&&n>20).length));fill(rem().filter(n=>coldSet.has(n)&&n<=20),Math.min(3,rem().filter(n=>coldSet.has(n)&&n<=20).length));}
+  else if(pattern==='hot-low_cold-high'){fill(rem().filter(n=>hotSet.has(n)&&n<=20),Math.min(3,rem().filter(n=>hotSet.has(n)&&n<=20).length));fill(rem().filter(n=>coldSet.has(n)&&n>20),Math.min(3,rem().filter(n=>coldSet.has(n)&&n>20).length));}
+  else if(pattern==='structural-auto'){
+    const auto=an.structuralPattern!=='mixed'?an.structuralPattern:an.dominant==='hot-hot'?'dominant-hot':an.dominant==='cold-cold'?'dominant-cold':'balanced-hot-cold';
+    return generatePattern(auto,an,fixed,excluded);
+  }
+  fill(rem(),6-chosen.length);
+  return chosen.sort((a,b)=>a-b).slice(0,6);
+}
+
+// ═══════════════════════════════════════════════════════════
+// BALL HELPERS
+// ═══════════════════════════════════════════════════════════
+function ballClass(n,hotSet,size='md'){
+  const sz=size==='lg'?'ball-lg':size==='sm'?'ball-sm':size==='xs'?'ball-xs':'ball-md';
+  let cl;
+  if(hotSet){
+    const ih=n>20,iht=hotSet.has(n);
+    cl=iht&&ih?'b-hot-high':iht?'b-hot-low':ih?'b-cold-high':'b-cold-low';
+  } else {
+    const ih=n>20,ie=n%2===0;
+    cl=ih&&ie?'b-even-high':ih?'b-odd-high':ie?'b-even-low':'b-odd-low';
+  }
+  return `ball ${sz} ${cl}`;
+}
+function ballHTML(n,hotSet,size='md'){
+  return `<div class="${ballClass(n,hotSet,size)}">${String(n).padStart(2,'0')}</div>`;
+}
+function ballsRowHTML(nums,hotSet,size='md'){
+  return `<div class="balls-row">${nums.map(n=>ballHTML(n,hotSet,size)).join('')}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER HELPERS
+// ═══════════════════════════════════════════════════════════
+function progressHTML(value,color,label){
+  return `<div class="progress-wrap">
+    <div class="progress-label"><span>${label}</span><span>${value}%</span></div>
+    <div class="progress-track"><div class="progress-fill" style="width:${value}%;background:${color}"></div></div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// GENERAR TAB
+// ═══════════════════════════════════════════════════════════
+let genCount=3,genStratGroup='basic',genStrategy='random';
+let genFixed='',genExcluded='';
+let mcResult=null,mcRunning=false;
+let compareResult=null;
+let compareNums=['','','','','',''];
+
+const STRATS={
+  basic:[
+    {id:'random',label:'🎲 Totalmente aleatorio'},
+    {id:'balanced-parity',label:'⚖️ Balanceado par/impar (3+3)'},
+    {id:'balanced-range',label:'📊 Balanceado bajo/alto (3+3)'},
+  ],
+  pattern:[
+    {id:'structural-auto',label:'🤖 Automático (patrón detectado)'},
+    {id:'dominant-hot',label:'🔥 Dominan Calientes (4🔥 + 2❄️)'},
+    {id:'dominant-cold',label:'❄️ Dominan Fríos (2🔥 + 4❄️)'},
+    {id:'balanced-hot-cold',label:'⚖️ Mixto Equilibrado (3🔥 + 3❄️)'},
+    {id:'hot-high_cold-low',label:'🔥⬆️ Calientes Altos / ❄️⬇️ Fríos Bajos'},
+    {id:'hot-low_cold-high',label:'🔥⬇️ Calientes Bajos / ❄️⬆️ Fríos Altos'},
+  ]
+};
+
+const PATTERN_LABELS={
+  random:'Aleatorio puro','balanced-parity':'Par/Impar 3+3','balanced-range':'Bajo/Alto 3+3',
+  'structural-auto':'Patrón auto','dominant-hot':'Dom. Calientes 4+2','dominant-cold':'Dom. Fríos 2+4',
+  'balanced-hot-cold':'Mixto 3🔥+3❄️','hot-high_cold-low':'🔥 Altos + ❄️ Bajos','hot-low_cold-high':'🔥 Bajos + ❄️ Altos'
+};
+
+function canUsePattern(){return analysis&&sorteos.length>=10;}
+
+function renderGenerar(){
+  const canP=canUsePattern();
+  const isPatStrat=STRATS.pattern.some(s=>s.id===genStrategy);
+
+  // Auto detected pattern description
+  let autoDesc='';
+  if(genStrategy==='structural-auto'&&canP){
+    const dm={
+      'hot-hot':{label:'🔥 Dominan Calientes (4🔥 + 2❄️)',color:'#ef4444'},
+      'hot-cold':{label:'⚖️ Mixto Equilibrado (3🔥 + 3❄️)',color:'#fbbf24'},
+      'cold-cold':{label:'❄️ Dominan Fríos (2🔥 + 4❄️)',color:'#38bdf8'}
+    };
+    const sm={
+      'hot-high_cold-low':{label:'🔥⬆️ Calientes Altos + ❄️⬇️ Fríos Bajos',color:'#f97316'},
+      'hot-low_cold-high':{label:'🔥⬇️ Calientes Bajos + ❄️⬆️ Fríos Altos',color:'#38bdf8'},
+      'mixed':{label:'⚖️ Sin correlación rango/temperatura',color:'#a78bfa'}
+    };
+    const usesStruct=analysis.structuralPattern!=='mixed';
+    const primary=usesStruct?sm[analysis.structuralPattern]:dm[analysis.dominant];
+    const secondary=usesStruct?dm[analysis.dominant]:null;
+    autoDesc=`<div class="strat-detected" style="border-color:${primary.color};color:${primary.color}">
+      Patrón detectado: ${primary.label}
+      ${secondary?`<br><span style="color:${secondary.color};opacity:0.8">${secondary.label}</span>`:''}
+      <br><span style="opacity:0.4;font-size:0.6rem">Basado en ${analysis.total} sorteos</span>
+    </div>`;
+  }
+
+  const stratBtns=(group)=>STRATS[group].map(s=>{
+    const isAuto=s.id==='structural-auto';
+    return `<button class="strat-btn${genStrategy===s.id?' active':''}" onclick="setStrat('${s.id}')">${s.label}${isAuto?autoDesc:''}</button>`;
+  }).join('');
+
+  // Tickets
+  const ticketsHTML=currentTickets.length===0?'':`
+    <div class="card">
+      <div class="card-title">🎱 Tus Boletos</div>
+      ${currentTickets.map((t,i)=>{
+        const fav=sessionFavorites.has(i);
+        const hc=canP?`<div class="ticket-stats"><span>🔥${t.filter(n=>analysis.hotSet.has(n)).length}</span><span>❄️${t.filter(n=>analysis.coldSet.has(n)).length}</span><span>⬆️${t.filter(n=>n>20).length}</span><span>⬇️${t.filter(n=>n<=20).length}</span></div>`:'';
+        return `<div class="ticket${fav?' fav':''}">
+          <div class="ticket-header">
+            <div><div class="ticket-label">Boleto #${i+1}</div><div class="ticket-sublabel">${PATTERN_LABELS[genStrategy]}</div></div>
+            <div class="ticket-actions">
+              <button onclick="toggleFav(${i})" title="Favorito">${fav?'⭐':'☆'}</button>
+              <button onclick="regenOne(${i})" title="Regenerar">🔄</button>
+            </div>
+          </div>
+          ${ballsRowHTML(t,canP?analysis.hotSet:null,'lg')}
+          ${hc}
+        </div>`;
+      }).join('')}
+      ${canP?`<div style="font-size:0.65rem;color:var(--muted);display:flex;gap:0.75rem;flex-wrap:wrap;padding:0.25rem 0">
+        <span><span style="display:inline-block;width:0.6rem;height:0.6rem;border-radius:50%;background:#ef4444;margin-right:0.2rem"></span>🔥 Cal.Bajo</span>
+        <span><span style="display:inline-block;width:0.6rem;height:0.6rem;border-radius:50%;background:#f97316;margin-right:0.2rem"></span>🔥 Cal.Alto</span>
+        <span><span style="display:inline-block;width:0.6rem;height:0.6rem;border-radius:50%;background:#38bdf8;margin-right:0.2rem"></span>❄️ Frío Bajo</span>
+        <span><span style="display:inline-block;width:0.6rem;height:0.6rem;border-radius:50%;background:#818cf8;margin-right:0.2rem"></span>❄️ Frío Alto</span>
+      </div>`:''}
+    </div>`;
+
+  // Pattern badge
+  const patternBadge=canP?`<div class="card" style="padding:0.75rem">
+    <div style="font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem">Patrón detectado — ${sorteos.length} sorteos</div>
+    <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+      <span class="chip" style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:var(--gold)">
+        ${analysis.dominant==='hot-hot'?'🔥 Dom. Calientes':analysis.dominant==='cold-cold'?'❄️ Dom. Fríos':'⚖️ Mixto'}
+      </span>
+      <span class="chip" style="background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.4);color:#a78bfa">
+        ${analysis.structuralPattern==='hot-high_cold-low'?'🔥 Altos calientes':analysis.structuralPattern==='hot-low_cold-high'?'🔥 Bajos calientes':'⚖️ Sin correlación'}
+      </span>
+    </div>
+  </div>`:'';
+
+  // History
+  const histHTML=sessionHistory.length===0?'':`<div class="card">
+    <div class="card-title">📋 Historial de sesión</div>
+    <div class="history-list">${sessionHistory.map((t,i)=>`
+      <div class="history-row"><span class="history-idx">${i+1}</span>${ballsRowHTML(t,canP?analysis.hotSet:null,'sm')}</div>`).join('')}
+    </div>
+  </div>`;
+
+  // Monte Carlo
+  const mcHTML=canP?`<div class="card">
+    <div class="card-title">🎲 Simulación Monte Carlo</div>
+    <div class="card-sub">Genera 10,000 boletos y evalúa cuáles se acercan al perfil histórico ganador. No predice resultados.</div>
+    ${mcResult?`<div class="stat-grid g3" style="margin-bottom:0.75rem">
+      <div class="stat-box"><div class="stat-label">% Calientes objetivo</div><div class="stat-val" style="color:#ef4444;font-size:1.2rem">${Math.round(mcResult.targetHotPct*100)}%</div></div>
+      <div class="stat-box"><div class="stat-label">% Bajos objetivo</div><div class="stat-val" style="color:#38bdf8;font-size:1.2rem">${Math.round(mcResult.targetLowPct*100)}%</div></div>
+      <div class="stat-box"><div class="stat-label">% Pares objetivo</div><div class="stat-val" style="color:var(--gold);font-size:1.2rem">${Math.round(mcResult.targetEvenPct*100)}%</div></div>
+    </div>
+    <div style="font-size:0.65rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.4rem">Top 10 por score estructural</div>
+    ${mcResult.topNums.map((item,i)=>`<div class="mc-row">
+      <span class="mc-rank">#${i+1}</span>
+      ${ballHTML(item.number,analysis.hotSet,'sm')}
+      <div class="mc-track"><div class="mc-fill" style="width:${(item.score/mcResult.topNums[0].score*100).toFixed(0)}%"></div></div>
+      <span class="mc-score">${item.score.toFixed(1)}%</span>
+    </div>`).join('')}
+    <p style="font-size:0.6rem;color:var(--muted);opacity:0.5;text-align:center;margin-top:0.5rem">Resultados varían en cada ejecución</p>
+    `:''}
+    <button class="btn-gold-outline" style="width:100%;margin-top:0.5rem" onclick="runMC()" ${mcRunning?'disabled':''}>
+      ${mcRunning?'⏳ Simulando 10,000 boletos…':mcResult?'🔄 Volver a simular':'▶️ Ejecutar simulación'}
+    </button>
+  </div>`:'';
+
+  // Compare
+  const cmpResult=compareResult?`<div style="margin-top:0.75rem">
+    <div class="stat-grid g3" style="margin-bottom:0.75rem">
+      <div class="stat-box"><div class="stat-label">Máx. coincidencias</div><div class="stat-val" style="color:var(--gold)">${compareResult.maxMatches}</div></div>
+      <div class="stat-box"><div class="stat-label">Prom. coincid.</div><div class="stat-val" style="color:#38bdf8">${compareResult.avgMatch}</div></div>
+      <div class="stat-box"><div class="stat-label">Sorteos</div><div class="stat-val" style="color:#a78bfa">${sorteos.length}</div></div>
+    </div>
+    <div style="font-size:0.65rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.4rem">Distribución de coincidencias</div>
+    ${[6,5,4,3,2,1,0].map(k=>`<div class="match-row">
+      <span class="match-label">${k} número${k!==1?'s':''}</span>
+      <div class="match-track"><div class="match-fill" style="width:${sorteos.length?(compareResult.matchCounts[k]/sorteos.length*100).toFixed(0):0}%;background:${k>=4?'var(--gold)':k>=2?'#38bdf8':'rgba(255,255,255,0.15)'}"></div></div>
+      <span class="match-count">${compareResult.matchCounts[k]}</span>
+    </div>`).join('')}
+    ${compareResult.bestMatch?`<div style="margin-top:0.75rem;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.25);border-radius:0.75rem;padding:0.65rem">
+      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:0.4rem">Mejor coincidencia (${compareResult.maxMatches} números) — ${compareResult.bestMatch.fecha}</div>
+      <div class="balls-row">${compareResult.bestMatch.numeros.map(n=>{
+        const inp=compareNums.map(Number).includes(n);
+        return `<div class="best-ball ${inp?'match':'no-match'}">${n}</div>`;
+      }).join('')}</div>
+      <div style="font-size:0.6rem;color:var(--muted);opacity:0.5;margin-top:0.35rem">🟡 = coincide con tu boleto</div>
+    </div>`:''}
+  </div>`:'';
+
+  const compareHTML=`<div class="card">
+    <div class="card-title">🔎 Comparar boleto con históricos</div>
+    <div class="card-sub">Ingresa 6 números para ver cuántos han coincidido con sorteos ganadores.</div>
+    <div class="num-grid">${compareNums.map((n,i)=>`<input class="num-input" type="number" min="1" max="40" value="${n}" oninput="setCmpNum(${i},this.value)" placeholder="${i+1}"/>`).join('')}</div>
+    <button class="btn-gold-outline" style="width:100%;margin-top:0.65rem" onclick="doCompare()">🔍 Comparar</button>
+    <div id="cmp-error" class="error-box" style="display:none;margin-top:0.5rem"></div>
+    ${cmpResult}
+  </div>`;
+
+  document.getElementById('content').innerHTML=`
+    <div class="card">
+      <div class="card-title">⚙️ Configuración</div>
+      <div style="margin-bottom:0.85rem">
+        <label class="label">Cantidad de boletos: ${genCount}</label>
+        <input type="range" min="1" max="10" value="${genCount}" oninput="setCount(this.value)"/>
+      </div>
+      <div style="margin-bottom:0.75rem">
+        <label class="label" style="margin-bottom:0.35rem">Tipo de estrategia</label>
+        <div class="tabs t2">
+          <button class="tab-btn${genStratGroup==='basic'?' active':''}" onclick="setStratGroup('basic')">📐 Básica</button>
+          <button class="tab-btn${genStratGroup==='pattern'?' active':''}" onclick="setStratGroup('pattern')">🔍 Por Patrón</button>
+        </div>
+      </div>
+      ${genStratGroup==='pattern'&&!canP?`<div class="warn-box">⚠️ Necesitas al menos 10 sorteos históricos para usar estrategias por patrón. Hay ${sorteos.length} actualmente.</div>`:''}
+      <div style="margin-bottom:0.75rem">${stratBtns(genStratGroup)}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.85rem">
+        <div><label class="label">Fijar números (máx 2)</label><input class="text-input" type="text" value="${genFixed}" placeholder="Ej: 7, 13" oninput="genFixed=this.value"/></div>
+        <div><label class="label">Excluir números</label><input class="text-input" type="text" value="${genExcluded}" placeholder="Ej: 1, 2, 3" oninput="genExcluded=this.value"/></div>
+      </div>
+      <button class="btn-primary" onclick="doGenerate()">✨ GENERAR BOLETOS</button>
+    </div>
+    ${ticketsHTML}
+    ${canP?patternBadge:''}
+    ${histHTML}
+    ${mcHTML}
+    ${compareHTML}
+    <p class="disclaimer">⚠️ Solo para entretenimiento. La lotería es aleatoria e impredecible.</p>
+  `;
+}
+
+function parseNums(str){
+  return str.split(',').map(s=>parseInt(s.trim())).filter(n=>!isNaN(n)&&n>=1&&n<=40);
+}
+
+function setCount(v){genCount=+v;renderGenerar();}
+function setStratGroup(g){genStratGroup=g;genStrategy=STRATS[g][0].id;renderGenerar();}
+function setStrat(id){genStrategy=id;renderGenerar();}
+function toggleFav(i){if(sessionFavorites.has(i))sessionFavorites.delete(i);else sessionFavorites.add(i);renderGenerar();}
+
+function makeTicket(){
+  const fixed=parseNums(genFixed).slice(0,2);
+  const excluded=parseNums(genExcluded);
+  const isP=STRATS.pattern.some(s=>s.id===genStrategy);
+  if(isP&&canUsePattern())return generatePattern(genStrategy,analysis,fixed,excluded);
+  return generateBasic(isP?'random':genStrategy,fixed,excluded);
+}
+
+function doGenerate(){
+  currentTickets=Array.from({length:genCount},makeTicket);
+  sessionFavorites.clear();
+  sessionHistory=[...currentTickets,...sessionHistory].slice(0,50);
+  renderGenerar();
+}
+
+function regenOne(i){
+  currentTickets[i]=makeTicket();
+  sessionFavorites.delete(i);
+  renderGenerar();
+}
+
+function runMC(){
+  if(mcRunning)return;mcRunning=true;renderGenerar();
+  setTimeout(()=>{mcResult=runMonteCarlo(sorteos,10000);mcRunning=false;renderGenerar();},60);
+}
+
+function setCmpNum(i,v){compareNums[i]=v;compareResult=null;}
+
+function doCompare(){
+  const nums=compareNums.map(Number);
+  const err=document.getElementById('cmp-error');
+  if(nums.some(isNaN)||nums.some(n=>n<1||n>40)){err.textContent='Ingresa 6 números válidos entre 1 y 40.';err.style.display='block';return;}
+  if(new Set(nums).size!==6){err.textContent='Los 6 números deben ser distintos.';err.style.display='block';return;}
+  err.style.display='none';
+  compareResult=compareWithHistory(nums.sort((a,b)=>a-b),sorteos);
+  renderGenerar();
+}
+
+// ═══════════════════════════════════════════════════════════
+// PATRONES TAB
+// ═══════════════════════════════════════════════════════════
+function renderPatrones(){
+  if(!analysis||sorteos.length<10){
+    document.getElementById('content').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5rem 1rem;gap:1rem;opacity:0.4">
+      <div style="font-size:3rem">🔍</div>
+      <p style="text-align:center;font-size:0.85rem">Se necesitan al menos 10 sorteos para analizar patrones.<br>Actualmente hay ${sorteos.length}.</p>
+    </div>`;return;
+  }
+  const{patternCounts:pc,avgQuadrant:aq,hotHighPct:hhp,coldLowPct:clp,structuralPattern:sp,dominant:dom,total,hotSet,coldSet}=analysis;
+  const SM={'hot-high_cold-low':{label:'🔥⬆️ Calientes Altos / ❄️⬇️ Fríos Bajos',color:'#f97316',desc:'Los números altos (21-40) tienden a ser calientes y los bajos (1-20) tienden a ser fríos.'},
+    'hot-low_cold-high':{label:'🔥⬇️ Calientes Bajos / ❄️⬆️ Fríos Altos',color:'#38bdf8',desc:'Los números bajos (1-20) tienden a ser calientes y los altos (21-40) tienden a ser fríos.'},
+    'mixed':{label:'⚖️ Sin correlación rango/temperatura',color:'#a78bfa',desc:'No hay una tendencia clara entre rango (alto/bajo) y temperatura (caliente/frío).'}};
+  const DM={'hot-hot':{label:'🔥 Dominan Calientes',color:'#ef4444'},'hot-cold':{label:'⚖️ Mixto Equilibrado',color:'#fbbf24'},'cold-cold':{label:'❄️ Dominan Fríos',color:'#38bdf8'}};
+  const st=SM[sp],dm=DM[dom];
+  const hotNums=[...hotSet].sort((a,b)=>a-b);const coldNums=[...coldSet].sort((a,b)=>a-b);
+
+  document.getElementById('content').innerHTML=`
+    <div class="card" style="border-color:${st.color}44">
+      <div class="label">Patrón estructural detectado</div>
+      <div class="card-title" style="color:${st.color};margin-top:0.2rem">${st.label}</div>
+      <div class="card-sub">${st.desc}</div>
+      ${progressHTML(hhp,'#f97316','Calientes que son Altos (21-40)')}
+      ${progressHTML(clp,'#38bdf8','Fríos que son Bajos (1-20)')}
+    </div>
+    <div class="card">
+      <div class="label">Temperatura dominante por sorteo</div>
+      <div class="card-title" style="color:${dm.color};margin-top:0.2rem">${dm.label}</div>
+      <div class="stat-grid g3" style="margin:0.65rem 0">
+        <div class="stat-box" style="border-color:#ef444433"><div class="stat-label">🔥 Dom.\nCalientes</div><div class="stat-val" style="color:#ef4444">${pc['hot-hot']}</div><div class="stat-sub">${Math.round(pc['hot-hot']/total*100)}%</div></div>
+        <div class="stat-box" style="border-color:#fbbf2433"><div class="stat-label">⚖️ Mixto\n3+3</div><div class="stat-val" style="color:#fbbf24">${pc['hot-cold']}</div><div class="stat-sub">${Math.round(pc['hot-cold']/total*100)}%</div></div>
+        <div class="stat-box" style="border-color:#38bdf833"><div class="stat-label">❄️ Dom.\nFríos</div><div class="stat-val" style="color:#38bdf8">${pc['cold-cold']}</div><div class="stat-sub">${Math.round(pc['cold-cold']/total*100)}%</div></div>
+      </div>
+      ${progressHTML(Math.round(pc['hot-hot']/total*100),'#ef4444','Dominan Calientes (≥4 🔥)')}
+      ${progressHTML(Math.round(pc['hot-cold']/total*100),'#fbbf24','Mixto Equilibrado (3+3)')}
+      ${progressHTML(Math.round(pc['cold-cold']/total*100),'#38bdf8','Dominan Fríos (≥4 ❄️)')}
+    </div>
+    <div class="card">
+      <div class="label">Composición promedio por boleto ganador</div>
+      <div style="font-size:0.65rem;color:var(--muted);margin-bottom:0.65rem">(de 6 números totales)</div>
+      <div class="stat-grid g2">
+        ${[['hot-low','🔥⬇️ Calientes Bajos','#ef4444'],['hot-high','🔥⬆️ Calientes Altos','#f97316'],['cold-low','❄️⬇️ Fríos Bajos','#38bdf8'],['cold-high','❄️⬆️ Fríos Altos','#818cf8']].map(([k,l,c])=>`
+        <div class="stat-box" style="border-color:${c}33">
+          <div class="stat-label">${l}</div>
+          <div class="stat-val" style="color:${c}">${aq[k]}</div>
+          <div class="stat-sub">promedio</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:0.85rem">
+      <div class="card" style="border-color:#ef444422;padding:0.85rem">
+        <div style="font-size:0.7rem;font-weight:700;color:#ef4444;margin-bottom:0.5rem">🔥 Números Calientes</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.25rem">
+          ${hotNums.map(n=>`<div style="width:1.8rem;height:1.8rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;font-family:var(--font-mono);background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444">${n}</div>`).join('')}
+        </div>
+      </div>
+      <div class="card" style="border-color:#38bdf822;padding:0.85rem">
+        <div style="font-size:0.7rem;font-weight:700;color:#38bdf8;margin-bottom:0.5rem">❄️ Números Fríos</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.25rem">
+          ${coldNums.map(n=>`<div style="width:1.8rem;height:1.8rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;font-family:var(--font-mono);background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:#38bdf8">${n}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <p class="disclaimer">⚠️ Los patrones son observaciones estadísticas. La lotería es aleatoria e impredecible.</p>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ESTADÍSTICAS TAB
+// ═══════════════════════════════════════════════════════════
+function renderStats(){
+  if(!sorteos.length){
+    document.getElementById('content').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5rem 1rem;gap:1rem;opacity:0.4">
+      <div style="font-size:3rem">📊</div><p style="text-align:center">No hay sorteos registrados.<br>Ve a Gestión para agregar sorteos.</p></div>`;return;
+  }
+  const freq=analysis?{...analysis.freq}:(()=>{const f={};for(let i=1;i<=40;i++)f[i]=0;sorteos.forEach(s=>s.numeros.forEach(n=>f[n]++));return f;})();
+  const mf=Math.max(...Object.values(freq));
+  const fs=Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  const top10=fs.slice(0,10),bot10=fs.slice(-10).reverse();
+  const tn=sorteos.length*6;
+  const parPct=Math.round(sorteos.reduce((a,s)=>a+s.numeros.filter(n=>n%2===0).length,0)/tn*100);
+  const lowPct=Math.round(sorteos.reduce((a,s)=>a+s.numeros.filter(n=>n<=20).length,0)/tn*100);
+
+  let sectionContent='';
+  if(statsSection==='frecuencia'){
+    sectionContent=`<div class="card">
+      <div class="card-title">🔢 Frecuencia por número</div>
+      <div class="scroll-area" style="max-height:16rem">
+        ${Object.entries(freq).map(([n,c])=>{
+          const isHot=analysis?.hotSet.has(+n),isHigh=+n>20;
+          const bc=analysis?(isHot&&isHigh?'#f97316':isHot?'#ef4444':isHigh?'#818cf8':'#38bdf8'):(+n>20?(+n%2===0?'#fbbf24':'#ef4444'):(+n%2===0?'#38bdf8':'#34d399'));
+          return `<div class="freq-row"><span class="freq-num">${n}</span><div class="freq-track"><div class="freq-fill" style="width:${(c/mf*100).toFixed(0)}%;background:${bc}"></div><span class="freq-count">${c}</span></div>${analysis?`<span class="freq-icon">${isHot?'🔥':'❄️'}</span>`:''}</div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="card"><div class="card-title">🔥 Top 10 más frecuentes</div><div class="balls-row" style="flex-wrap:wrap;gap:0.6rem;margin-top:0.5rem">${top10.map(([n,c])=>`<div style="display:flex;flex-direction:column;align-items:center;gap:0.2rem">${ballHTML(+n,analysis?.hotSet,'md')}<span style="font-size:0.6rem;color:var(--muted);font-family:var(--font-mono)">${c}x</span></div>`).join('')}</div></div>
+    <div class="card"><div class="card-title">❄️ Top 10 menos frecuentes</div><div class="balls-row" style="flex-wrap:wrap;gap:0.6rem;margin-top:0.5rem">${bot10.map(([n,c])=>`<div style="display:flex;flex-direction:column;align-items:center;gap:0.2rem">${ballHTML(+n,analysis?.hotSet,'md')}<span style="font-size:0.6rem;color:var(--muted);font-family:var(--font-mono)">${c}x</span></div>`).join('')}</div></div>`;
+  } else if(statsSection==='brechas'){
+    const gaps=analyzeGaps(sorteos);
+    sectionContent=`<div class="card">
+      <div class="card-title">⏱️ Brechas de aparición</div>
+      <div class="card-sub">Sorteos transcurridos desde la última aparición de cada número. Una brecha alta no implica mayor probabilidad.</div>
+      <div class="scroll-area">
+        ${gaps.map(g=>{
+          const bw=Math.min(100,(g.sorteosSinceLastSeen/sorteos.length)*100);
+          const urgent=g.sorteosSinceLastSeen>sorteos.length*0.5;
+          return `<div class="gap-row">
+            <div class="gap-ball" style="background:${urgent?'rgba(251,191,36,0.2)':'rgba(255,255,255,0.06)'};border:1px solid ${urgent?'#fbbf2466':'rgba(255,255,255,0.1)'};color:${urgent?'var(--gold)':'var(--text)'}">${g.number}</div>
+            <div class="gap-wrap">
+              <div class="gap-track"><div class="gap-fill" style="width:${bw.toFixed(0)}%;background:${urgent?'var(--gold)':'rgba(255,255,255,0.2)'}"></div></div>
+              <div class="gap-info"><span>${g.neverSeen?'Nunca visto':`${g.sorteosSinceLastSeen} sin salir`}</span><span>${g.avgGap!==null?`prom: ${g.avgGap}`:''}</span></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="font-size:0.6rem;color:var(--muted);opacity:0.5;margin-top:0.5rem">🟡 Brecha &gt;50% del total de sorteos</div>
+    </div>`;
+  } else if(statsSection==='pares'){
+    const pairs=analyzePairs(sorteos);
+    sectionContent=`<div class="card">
+      <div class="card-title">🔗 Top 10 pares más frecuentes</div>
+      <div class="card-sub">Combinaciones de 2 números que han salido juntas más veces.</div>
+      ${pairs.length===0?'<p style="text-align:center;opacity:0.3;padding:2rem">No hay suficientes datos.</p>':pairs.map(({pair,count},i)=>`
+        <div class="pair-row">
+          <span class="pair-rank">#${i+1}</span>
+          ${ballHTML(pair[0],analysis?.hotSet,'sm')}${ballHTML(pair[1],analysis?.hotSet,'sm')}
+          <div class="pair-bar-wrap"><div class="pair-bar" style="width:${(count/pairs[0].count*100).toFixed(0)}%"></div></div>
+          <span class="pair-count">${count}x</span>
+        </div>`).join('')}
+    </div>`;
+  } else if(statsSection==='meses'){
+    const monthly=analyzeByMonth(sorteos);
+    const maxMC=Math.max(...monthly.map(m=>m.count),1);
+    sectionContent=`<div class="card">
+      <div class="card-title">📅 Sorteos por mes</div>
+      <div class="card-sub">Distribución histórica de sorteos y número más frecuente por mes.</div>
+      ${monthly.map(m=>`<div class="month-row">
+        <span class="month-name">${m.month}</span>
+        <div class="month-track"><div class="month-fill" style="width:${m.count?(m.count/maxMC*100).toFixed(0):0}%;min-width:${m.count?'2rem':'0'}">${m.count?`<span>${m.count}</span>`:''}</div></div>
+        <div class="month-top">${m.topNum!==null?`<div class="month-topball">${m.topNum}</div>`:'<span style="color:var(--muted);font-size:0.65rem">—</span>'}</div>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  document.getElementById('content').innerHTML=`
+    <div class="card">
+      <div class="card-title">📈 Resumen</div>
+      <div class="card-sub">Basado en ${sorteos.length} sorteos</div>
+      <div class="stat-grid g2">
+        <div class="stat-box"><div class="stat-label">Pares</div><div class="stat-val" style="color:var(--gold)">${parPct}%</div><div class="stat-sub">vs ${100-parPct}% impares</div></div>
+        <div class="stat-box"><div class="stat-label">Bajos (1-20)</div><div class="stat-val" style="color:var(--gold)">${lowPct}%</div><div class="stat-sub">vs ${100-lowPct}% altos</div></div>
+      </div>
+    </div>
+    <div class="tabs t4">${[['frecuencia','📊 Frec.'],['brechas','⏱️ Brechas'],['pares','🔗 Pares'],['meses','📅 Meses']].map(([id,l])=>`<button class="tab-btn${statsSection===id?' active':''}" onclick="setStatsSection('${id}')">${l}</button>`).join('')}</div>
+    ${sectionContent}
+    <p class="disclaimer">⚠️ Las estadísticas son informativas. La lotería es aleatoria.</p>`;
+}
+
+function setStatsSection(s){statsSection=s;renderStats();}
+
+// ═══════════════════════════════════════════════════════════
+// GESTIÓN TAB
+// ═══════════════════════════════════════════════════════════
+let gestionNums=['','','','','',''];
+let gestionFecha='';
+let gestionError='';
+let gestionSuccess='';
+
+function renderGestion(){
+  const paginated=sorteos.slice(gestionPage*GESTION_PER_PAGE,(gestionPage+1)*GESTION_PER_PAGE);
+  const totalPages=Math.ceil(sorteos.length/GESTION_PER_PAGE);
+  document.getElementById('content').innerHTML=`
+    <div class="card">
+      <div class="card-title">${gestionEditId!==null?'✏️ Editar Sorteo':'➕ Registrar Sorteo'}</div>
+      <div style="margin-bottom:0.65rem"><label class="label">Fecha del sorteo</label>
+        <input class="text-input" type="date" value="${gestionFecha}" oninput="gestionFecha=this.value"/></div>
+      <label class="label">Números ganadores (1–40)</label>
+      <div class="num-grid">${gestionNums.map((n,i)=>`<input class="num-input" type="number" min="1" max="40" value="${n}" oninput="setGNum(${i},this.value)"/>`).join('')}</div>
+      ${gestionError?`<div class="error-box" style="margin-top:0.5rem">${gestionError}</div>`:''}
+      ${gestionSuccess?`<div class="success-box" style="margin-top:0.5rem">${gestionSuccess}</div>`:''}
+      <div style="display:flex;gap:0.5rem;margin-top:0.65rem">
+        <button class="btn-primary" onclick="doSave()">${gestionEditId!==null?'💾 Actualizar':'💾 Guardar'}</button>
+        ${gestionEditId!==null?`<button class="btn-ghost" onclick="cancelEdit()">✕</button>`:''}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📁 Importar / Exportar CSV</div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-bottom:0.65rem">Formato: <code>fecha,n1,n2,n3,n4,n5,n6</code></div>
+      <div style="display:flex;gap:0.5rem">
+        <label class="btn-ghost" style="flex:1;text-align:center;cursor:pointer">📤 Importar CSV<input type="file" accept=".csv" style="display:none" onchange="doImportCSV(this)"/></label>
+        <button class="btn-ghost" style="flex:1" onclick="doExportCSV()" ${!sorteos.length?'disabled':''}>📥 Exportar CSV</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🗂️ Sorteos Registrados <span style="font-size:0.8rem;font-weight:400;opacity:0.4">(${sorteos.length})</span></div>
+      ${!sorteos.length?'<p style="text-align:center;opacity:0.3;padding:1.5rem 0">No hay sorteos registrados aún.</p>':
+        paginated.map(s=>`<div class="sorteo-row">
+          <div style="overflow:hidden">
+            <div style="float:right;display:flex;gap:0.4rem">
+              <button class="btn-edit" onclick="startEdit(${s.id})">Editar</button>
+              <button class="btn-del" onclick="doDelete(${s.id})">Eliminar</button>
+            </div>
+            <div class="sorteo-fecha">${s.fecha}</div>
+          </div>
+          <div style="clear:both"></div>
+          ${ballsRowHTML(s.numeros,null,'sm')}
+        </div>`).join('')}
+      ${totalPages>1?`<div class="pagination">
+        <button class="btn-ghost" onclick="setGPage(${gestionPage-1})" ${gestionPage===0?'disabled':''}>‹ Anterior</button>
+        <span class="page-info">${gestionPage+1} / ${totalPages}</span>
+        <button class="btn-ghost" onclick="setGPage(${gestionPage+1})" ${gestionPage===totalPages-1?'disabled':''}>Siguiente ›</button>
+      </div>`:''}
+    </div>`;
+}
+
+function setGNum(i,v){gestionNums[i]=v;}
+function setGPage(p){gestionPage=p;renderGestion();}
+function cancelEdit(){gestionEditId=null;gestionFecha='';gestionNums=['','','','','',''];gestionError='';gestionSuccess='';renderGestion();}
+
+function validateGestion(){
+  if(!gestionFecha)return'La fecha es requerida.';
+  const p=gestionNums.map(n=>parseInt(n));
+  if(p.some(isNaN))return'Todos los 6 números son requeridos.';
+  if(p.some(n=>n<1||n>40))return'Números deben estar entre 1 y 40.';
+  if(new Set(p).size!==6)return'Los números no pueden repetirse.';
+  return null;
+}
+
+async function doSave(){
+  const err=validateGestion();
+  if(err){gestionError=err;gestionSuccess='';renderGestion();return;}
+  gestionError='';
+  const ns=gestionNums.map(Number).sort((a,b)=>a-b);
+  if(gestionEditId!==null){
+    const idx=sorteos.findIndex(s=>s.id===gestionEditId);
+    if(idx!==-1){sorteos[idx]={id:gestionEditId,fecha:gestionFecha,numeros:ns};await dbPut(sorteos[idx]);}
+  } else {
+    const item={id:Date.now(),fecha:gestionFecha,numeros:ns};
+    sorteos.unshift(item);await dbPut(item);
+  }
+  sorteos.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+  analysis=sorteos.length>=10?analyzePatterns(sorteos):null;
+  updateBadge();
+  gestionSuccess=gestionEditId!==null?'✅ Sorteo actualizado.':'✅ Sorteo guardado.';
+  gestionEditId=null;gestionFecha='';gestionNums=['','','','','',''];
+  renderGestion();
+}
+
+function startEdit(id){
+  const s=sorteos.find(x=>x.id===id);if(!s)return;
+  gestionEditId=id;gestionFecha=s.fecha;gestionNums=s.numeros.map(String);
+  gestionError='';gestionSuccess='';gestionPage=0;renderGestion();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function doDelete(id){
+  if(!confirm('¿Eliminar este sorteo?'))return;
+  await dbDelete(id);
+  sorteos=sorteos.filter(s=>s.id!==id);
+  analysis=sorteos.length>=10?analyzePatterns(sorteos):null;
+  updateBadge();
+  if(gestionPage>0&&gestionPage>=Math.ceil(sorteos.length/GESTION_PER_PAGE))gestionPage--;
+  renderGestion();
+}
+
+function doImportCSV(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const lines=e.target.result.trim().split('\n').filter(Boolean);
+    const imported=[];let skipped=0;
+    lines.forEach(line=>{
+      const parts=line.split(',').map(s=>s.trim());if(parts.length<7){skipped++;return;}
+      const[f,...rest]=parts;const ns=rest.slice(0,6).map(Number);
+      if(ns.some(isNaN)||ns.some(n=>n<1||n>40)||new Set(ns).size!==6){skipped++;return;}
+      imported.push({id:Date.now()+Math.random(),fecha:f,numeros:ns.sort((a,b)=>a-b)});
+    });
+    const existFechas=new Set(sorteos.map(s=>s.fecha));
+    const newOnes=imported.filter(x=>!existFechas.has(x.fecha));
+    for(const item of newOnes){sorteos.push(item);await dbPut(item);}
+    sorteos.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+    analysis=sorteos.length>=10?analyzePatterns(sorteos):null;
+    updateBadge();
+    gestionSuccess=`✅ ${newOnes.length} sorteos importados. ${skipped} filas omitidas.`;
+    gestionError='';renderGestion();
+  };
+  reader.readAsText(file);input.value='';
+}
+
+function doExportCSV(){
+  const content=sorteos.map(s=>`${s.fecha},${s.numeros.join(',')}`).join('\n');
+  const blob=new Blob([content],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='sorteos_historicos.csv';a.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAV & ROUTING
+// ═══════════════════════════════════════════════════════════
+function showTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nav-dot').forEach(d=>d.style.display='none');
+  document.getElementById('nb-'+tab).classList.add('active');
+  document.getElementById('nd-'+tab).style.display='block';
+  if(tab==='generar')renderGenerar();
+  else if(tab==='patrones')renderPatrones();
+  else if(tab==='stats')renderStats();
+  else if(tab==='gestion')renderGestion();
+}
+
+function updateBadge(){
+  document.getElementById('badge-count').textContent=`${sorteos.length} sorteos`;
+  const bp=document.getElementById('badge-pattern');
+  if(analysis){bp.style.display='block';}else{bp.style.display='none';}
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+async function init(){
+  try{
+    await openDB();
+    const data=await dbGetAll();
+    sorteos=data.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+    analysis=sorteos.length>=10?analyzePatterns(sorteos):null;
+    updateBadge();
+    document.getElementById('loading').style.display='none';
+    document.getElementById('app').style.display='flex';
+    showTab('generar');
+  }catch(err){
+    document.getElementById('loading').innerHTML=`<div style="font-size:2rem">⚠️</div><p style="color:#fca5a5">Error al cargar: ${err.message}</p>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
